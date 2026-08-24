@@ -15,6 +15,7 @@ use App\Http\Controllers\PriorityConfigController;
 use App\Http\Controllers\ResourceCategoryController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\SectorConfigController;
+use App\Http\Controllers\TenantSettingsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +61,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // Predictive Maintenance anomaly scanner
         Route::post('predictive-maintenance/scan', [PredictiveMaintenanceController::class, 'scan']);
+
+        // Advanced Workspace Settings & Role Management
+        Route::get('tenant/settings', [TenantSettingsController::class, 'getSettings']);
+        Route::put('tenant/settings', [TenantSettingsController::class, 'updateSettings']);
+        Route::get('tenant/users', [TenantSettingsController::class, 'getUsers']);
+        Route::patch('tenant/users/{user}/role', [TenantSettingsController::class, 'updateUserRole']);
+        Route::post('tenant/sync-templates', [TenantSettingsController::class, 'syncTemplates']);
     });
 
     // Supervisor — read maintenance orders, analytics, audit logs, forecasts
