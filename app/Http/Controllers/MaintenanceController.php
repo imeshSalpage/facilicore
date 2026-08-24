@@ -20,7 +20,12 @@ class MaintenanceController extends Controller
     public function index(): JsonResponse
     {
         $orders = MaintenanceOrder::with(['resource.category', 'resource.facility', 'assignedTo'])
-            ->orderByRaw("FIELD(status, 'in_progress', 'scheduled', 'completed', 'cancelled')")
+            ->orderByRaw("CASE status
+                WHEN 'in_progress' THEN 1
+                WHEN 'scheduled'   THEN 2
+                WHEN 'completed'   THEN 3
+                WHEN 'cancelled'   THEN 4
+                ELSE 5 END")
             ->orderBy('scheduled_at')
             ->get();
 

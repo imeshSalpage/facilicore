@@ -31,6 +31,24 @@ class FacilitySeeder extends Seeder
                 'location'    => 'East Campus, Building C',
                 'tenant_id'   => $uni->id,
             ],
+            [
+                'name'        => 'Humanities & Arts Centre',
+                'description' => 'Arts and lecture space with recording studios.',
+                'location'    => 'South Campus, Building H',
+                'tenant_id'   => $uni->id,
+            ],
+            [
+                'name'        => 'Student Union Building',
+                'description' => 'Student activity hub with meeting and board rooms.',
+                'location'    => 'West Campus, Building SU',
+                'tenant_id'   => $uni->id,
+            ],
+            [
+                'name'        => 'Sports & Recreation Complex',
+                'description' => 'Indoor sports courts, fitness gyms and fields.',
+                'location'    => 'South-West Campus, Building SR',
+                'tenant_id'   => $uni->id,
+            ],
         ];
 
         foreach ($uniFacilities as $data) {

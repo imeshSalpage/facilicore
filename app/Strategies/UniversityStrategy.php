@@ -34,7 +34,7 @@ class UniversityStrategy implements SectorStrategyInterface
             'Study Rooms',
             'Sports Facilities',
             'AV & Media Equipment',
-            'Meeting Rooms',
+            'Meeting & Board Rooms',
         ];
     }
 }
