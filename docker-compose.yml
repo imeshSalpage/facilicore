@@ -1,4 +1,25 @@
 services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-facilicore}
+      MYSQL_USER: ${DB_USERNAME:-facilicore}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - tenant-network
+
   backend:
     build:
       context: .
@@ -10,7 +31,8 @@ services:
     environment:
       - APP_ENV=local
     depends_on:
-      - proxy-helper
+      mysql:
+        condition: service_healthy
     networks:
       - tenant-network
 
@@ -55,6 +77,10 @@ services:
       - "8025:8025"
     networks:
       - tenant-network
+
+volumes:
+  mysql_data:
+    driver: local
 
 networks:
   tenant-network:

@@ -131,6 +131,14 @@ migrate-seed: ## Run migrations and seed the database
 seed: ## Run database seeders only
 	$(ARTISAN) db:seed
 
+.PHONY: seed-demo
+seed-demo: ## Seed rich multi-sector demo dataset (all 4 sectors + composite templates)
+	$(ARTISAN) db:seed --class=TenantDemoSeeder
+
+.PHONY: db-shell
+db-shell: ## Open MySQL CLI inside the database container
+	$(DOCKER_COMPOSE) exec mysql mysql -u facilicore -psecret facilicore
+
 .PHONY: rollback
 rollback: ## Roll back the last database migration
 	$(ARTISAN) migrate:rollback
