@@ -11,8 +11,8 @@ FaciliCore is a multi-sector, multi-tenant Facility & Resource Management SaaS.
 ### Multi-Tenancy Architecture
 - **Isolation Model**: Single-database multi-tenancy.
 - **Scoping Mechanic**: Every query targeting tenant-specific tables must be scoped via the `TenantScope` query scope using the active `tenant_id`.
-- **Tenant Context Binding**: The `TenantMiddleware` extracts the subdomain from the hostname (e.g., `acme.lvh.me` -> `acme`) and registers the corresponding `Tenant` model in the container.
-- **Dynamic Session Cookies**: Wildcard session cookies are stored under `.lvh.me` (for development) and `.facilicore.com` (for production).
+- **Tenant Context Binding**: The `TenantMiddleware` extracts the subdomain from the hostname (e.g., `acme.facilicore.me` -> `acme`) and registers the corresponding `Tenant` model in the container.
+- **Dynamic Session Cookies**: Wildcard session cookies are stored under `.facilicore.me` (or `.lvh.me` / `.facilicore.com`).
 - **Same-Origin Reverse Proxy**: Next.js (frontend) and Laravel (backend) run behind an Nginx proxy mapping port 80. All authentication endpoints are prefixed with `/api` (e.g., `POST /api/register`, `POST /api/login`) to route cleanly through the Nginx proxy to Laravel.
 
 ---

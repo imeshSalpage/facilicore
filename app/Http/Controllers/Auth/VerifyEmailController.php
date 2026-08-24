@@ -18,7 +18,7 @@ class VerifyEmailController extends Controller
         $frontendUrl = config('app.frontend_url');
         if ($tenant) {
             $parsedUrl = parse_url($frontendUrl);
-            $host = $parsedUrl['host'] ?? 'lvh.me';
+            $host = $parsedUrl['host'] ?? 'facilicore.me';
             $scheme = $parsedUrl['scheme'] ?? 'http';
             $port = isset($parsedUrl['port']) ? ':' . $parsedUrl['port'] : '';
             $frontendUrl = "{$scheme}://{$tenant->subdomain}.{$host}{$port}";

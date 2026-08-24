@@ -42,7 +42,7 @@ setup: ## Full first-time project setup (copy .env, build, install deps, migrate
 	@$(MAKE) migrate-seed
 	@echo ""
 	@echo "$(BOLD)$(GREEN)✔ Setup complete!$(RESET)"
-	@echo "  App     → http://lvh.me"
+	@echo "  App     → http://facilicore.me (or http://lvh.me)"
 	@echo "  MailHog → http://localhost:8025"
 	@echo ""
 

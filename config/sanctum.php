@@ -19,7 +19,7 @@ return [
     */
 
     'stateful' => (function() {
-        $domains = ['localhost', 'lvh.me', '127.0.0.1', '::1'];
+        $domains = ['localhost', 'lvh.me', 'facilicore.me', '127.0.0.1', '::1'];
         if (app()->runningInConsole()) {
             return $domains;
         }
@@ -27,7 +27,7 @@ return [
         if ($referer) {
             $refererHost = parse_url($referer, PHP_URL_HOST);
             $refererPort = parse_url($referer, PHP_URL_PORT);
-            if ($refererHost && (preg_match('/^[a-z0-9\-]+\.(localhost|lvh\.me)$/i', $refererHost) || $refererHost === 'localhost' || $refererHost === 'lvh.me')) {
+            if ($refererHost && (preg_match('/^[a-z0-9\-]+\.(localhost|lvh\.me|facilicore\.me)$/i', $refererHost) || $refererHost === 'localhost' || $refererHost === 'lvh.me' || $refererHost === 'facilicore.me')) {
                 $domains[] = $refererHost;
                 if ($refererPort) {
                     $domains[] = $refererHost . ':' . $refererPort;

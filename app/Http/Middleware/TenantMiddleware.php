@@ -18,7 +18,9 @@ class TenantMiddleware
         $parts = explode('.', $host);
         
         $subdomain = null;
-        if (count($parts) === 3 && $parts[1] === 'lvh' && $parts[2] === 'me') {
+        if (count($parts) === 3 && $parts[1] === 'facilicore' && $parts[2] === 'me') {
+            $subdomain = $parts[0];
+        } elseif (count($parts) === 3 && $parts[1] === 'lvh' && $parts[2] === 'me') {
             $subdomain = $parts[0];
         } elseif (count($parts) === 2 && $parts[1] === 'localhost') {
             $subdomain = $parts[0];

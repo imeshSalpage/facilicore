@@ -156,7 +156,19 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    'domain' => (function() {
+        if (app()->runningInConsole()) {
+            return env('SESSION_DOMAIN', '.facilicore.me');
+        }
+        $host = request()->getHost();
+        if (str_ends_with($host, 'facilicore.me')) {
+            return '.facilicore.me';
+        }
+        if (str_ends_with($host, 'lvh.me')) {
+            return '.lvh.me';
+        }
+        return env('SESSION_DOMAIN', '.facilicore.me');
+    })(),
 
     /*
     |--------------------------------------------------------------------------
