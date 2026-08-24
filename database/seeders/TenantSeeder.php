@@ -32,5 +32,21 @@ class TenantSeeder extends Seeder
                 'sector' => 'corporate'
             ]
         );
+
+        Tenant::firstOrCreate(
+            ['subdomain' => 'imesh'],
+            [
+                'name'   => 'Imesh Technology Core',
+                'sector' => 'university'
+            ]
+        );
+
+        Tenant::firstOrCreate(
+            ['subdomain' => 'government'],
+            [
+                'name'   => 'Metro City Council',
+                'sector' => 'government'
+            ]
+        );
     }
 }

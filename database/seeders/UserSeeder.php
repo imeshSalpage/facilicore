@@ -114,8 +114,58 @@ class UserSeeder extends Seeder
             ],
         ];
 
-        foreach ($corpUsers as $data) {
-            User::withoutGlobalScopes()->firstOrCreate(['email' => $data['email']], $data);
+        // 4. Imesh Tenant
+        $imesh = Tenant::where('subdomain', 'imesh')->first();
+        if ($imesh) {
+            $imeshUsers = [
+                [
+                    'name'              => 'Imesh Admin',
+                    'email'             => 'imesh@facilicore.me',
+                    'password'          => Hash::make('password'),
+                    'role'              => 'admin',
+                    'email_verified_at' => now(),
+                    'tenant_id'         => $imesh->id,
+                ],
+                [
+                    'name'              => 'Imesh Supervisor',
+                    'email'             => 'supervisor@imesh.demo',
+                    'password'          => Hash::make('password'),
+                    'role'              => 'supervisor',
+                    'email_verified_at' => now(),
+                    'tenant_id'         => $imesh->id,
+                ],
+                [
+                    'name'              => 'Imesh Student',
+                    'email'             => 'student@imesh.demo',
+                    'password'          => Hash::make('password'),
+                    'role'              => 'end_user',
+                    'email_verified_at' => now(),
+                    'tenant_id'         => $imesh->id,
+                ],
+            ];
+
+            foreach ($imeshUsers as $data) {
+                User::withoutGlobalScopes()->firstOrCreate(['email' => $data['email']], $data);
+            }
+        }
+
+        // 5. Government
+        $gov = Tenant::where('subdomain', 'government')->first();
+        if ($gov) {
+            $govUsers = [
+                [
+                    'name'              => 'Council Admin',
+                    'email'             => 'admin@metro.gov',
+                    'password'          => Hash::make('password'),
+                    'role'              => 'admin',
+                    'email_verified_at' => now(),
+                    'tenant_id'         => $gov->id,
+                ],
+            ];
+
+            foreach ($govUsers as $data) {
+                User::withoutGlobalScopes()->firstOrCreate(['email' => $data['email']], $data);
+            }
         }
     }
 }
