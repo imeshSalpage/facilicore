@@ -10,6 +10,7 @@ class Booking extends Model
 {
     protected $fillable = [
         'tenant_id',
+        'composite_booking_id',
         'resource_id',
         'user_id',
         'start_at',
@@ -17,6 +18,8 @@ class Booking extends Model
         'status',
         'notes',
         'priority',
+        'urgency',
+        'priority_score',
     ];
 
     protected static function booted(): void
