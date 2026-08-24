@@ -35,6 +35,7 @@ class ResourceController extends Controller
             'specifications' => 'nullable|array',
             'capacity' => 'nullable|integer|min:0',
             'status' => 'nullable|string|in:active,maintenance,retired',
+            'image_url' => 'nullable|string|max:1000',
         ]);
 
         $validated['tenant_id'] = app(Tenant::class)->id;
@@ -68,6 +69,7 @@ class ResourceController extends Controller
             'specifications' => 'nullable|array',
             'capacity' => 'nullable|integer|min:0',
             'status' => 'required|string|in:active,maintenance,retired',
+            'image_url' => 'nullable|string|max:1000',
         ]);
 
         $resource->update($validated);

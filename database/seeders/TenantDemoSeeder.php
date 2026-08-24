@@ -543,19 +543,90 @@ class TenantDemoSeeder extends Seeder
                 continue;
             }
 
-            Resource::withoutGlobalScopes()->firstOrCreate(
+            $imageUrl = $this->resolveResourceImage($def['cat'], $def['name']);
+
+            Resource::withoutGlobalScopes()->updateOrCreate(
                 ['name' => $def['name'], 'tenant_id' => $tenant->id],
                 [
                     'name'        => $def['name'],
                     'description' => $def['desc'],
                     'status'      => 'active',
                     'capacity'    => $def['cap'],
+                    'image_url'   => $imageUrl,
                     'tenant_id'   => $tenant->id,
                     'facility_id' => $facility->id,
                     'category_id' => $category->id,
                 ]
             );
         }
+    }
+
+    private function resolveResourceImage(string $category, string $name): string
+    {
+        $cat = strtolower($category);
+        $res = strtolower($name);
+
+        if (str_contains($cat, 'theatre') || str_contains($cat, 'auditorium') || str_contains($res, 'theatre') || str_contains($res, 'hall')) {
+            if (str_contains($cat, 'surgical') || str_contains($res, 'operating') || str_contains($res, 'surgery')) {
+                return 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80';
+            }
+            return 'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'imaging') || str_contains($cat, 'mri') || str_contains($res, 'scanner') || str_contains($res, 'mri') || str_contains($res, 'ct')) {
+            return 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'surgical') || str_contains($cat, 'operating') || str_contains($res, 'surgical') || str_contains($res, 'anaesthesia') || str_contains($res, 'autoclave')) {
+            return 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'icu') || str_contains($cat, 'recovery') || str_contains($cat, 'ward') || str_contains($res, 'bed') || str_contains($res, 'bay')) {
+            return 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'dialysis') || str_contains($cat, 'infusion') || str_contains($cat, 'clinical') || str_contains($res, 'infusion')) {
+            return 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'computer') || str_contains($cat, 'ai') || str_contains($res, 'workstation') || str_contains($res, 'gpu') || str_contains($res, 'cluster') || str_contains($res, 'server')) {
+            return 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'chemistry') || str_contains($cat, 'spectrometer') || str_contains($res, 'spectrometer') || str_contains($res, 'chromatography') || str_contains($res, 'fume')) {
+            return 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'biology') || str_contains($cat, 'microscope') || str_contains($res, 'microscope') || str_contains($res, 'pcr') || str_contains($res, 'centrifuge')) {
+            return 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'engineering') || str_contains($cat, 'robotics') || str_contains($cat, '3d') || str_contains($res, 'robot') || str_contains($res, 'printer') || str_contains($res, 'cnc') || str_contains($res, 'oscilloscope')) {
+            return 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'boardroom') || str_contains($cat, 'executive') || str_contains($res, 'boardroom')) {
+            return 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'studio') || str_contains($cat, 'media') || str_contains($res, 'recording') || str_contains($res, 'camera') || str_contains($res, 'podcast')) {
+            return 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'chamber') || str_contains($cat, 'council') || str_contains($cat, 'court')) {
+            return 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'vehicle') || str_contains($cat, 'fleet') || str_contains($res, 'car') || str_contains($res, 'van') || str_contains($res, 'ambulance')) {
+            return 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=800&q=80';
+        }
+
+        if (str_contains($cat, 'study') || str_contains($cat, 'pod') || str_contains($res, 'pod') || str_contains($res, 'booth')) {
+            return 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80';
+        }
+
+        // Default clean facility / workspace image
+        return 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80';
     }
 
     private function seedExtraUsers(Tenant $tenant): void

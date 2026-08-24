@@ -16,6 +16,7 @@ class Resource extends Model
         'specifications',
         'capacity',
         'status',
+        'image_url',
         'tenant_id',
     ];
 
