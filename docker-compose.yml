@@ -1,0 +1,61 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.Dockerfile
+    container_name: laravel_backend
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/frontend # Avoid mounting frontend code into the backend container's node_modules area
+    environment:
+      - APP_ENV=local
+    depends_on:
+      - proxy-helper
+    networks:
+      - tenant-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: nextjs_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - tenant-network
+
+  proxy-helper:
+    image: alpine
+    container_name: proxy_helper
+    command: /bin/sh -c "exit 0"
+    networks:
+      - tenant-network
+
+  proxy:
+    image: nginx:alpine
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - tenant-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - tenant-network
+
+networks:
+  tenant-network:
+    driver: bridge
