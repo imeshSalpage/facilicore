@@ -77,13 +77,12 @@ class TenantSettingsControllerTest extends TestCase
         $this->getJson('/api/tenant/settings')->assertStatus(403);
     }
 
-    public function test_admin_can_update_tenant_name_sector_and_settings(): void
+    public function test_admin_can_update_tenant_name_and_settings(): void
     {
         Sanctum::actingAs($this->admin);
 
         $response = $this->putJson('/api/tenant/settings', [
-            'name'     => 'St Jude Hospital Care',
-            'sector'   => 'healthcare',
+            'name'     => 'Eastbridge Institute of Tech',
             'settings' => [
                 'auto_approve_standard_bookings' => true,
                 'max_advance_booking_days'        => 90,
@@ -91,21 +90,21 @@ class TenantSettingsControllerTest extends TestCase
                 'conflict_mode'                   => 'first_come',
                 'maintenance_auto_schedule'       => false,
                 'anomaly_sensitivity'             => 80,
-                'notification_email'              => 'alerts@stjude.org',
+                'notification_email'              => 'alerts@eastbridge.edu',
             ],
         ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('tenant.name', 'St Jude Hospital Care')
-            ->assertJsonPath('tenant.sector', 'healthcare')
+            ->assertJsonPath('tenant.name', 'Eastbridge Institute of Tech')
+            ->assertJsonPath('tenant.sector', 'university') // Sector remains unchanged
             ->assertJsonPath('tenant.settings.auto_approve_standard_bookings', true)
             ->assertJsonPath('tenant.settings.max_advance_booking_days', 90)
-            ->assertJsonPath('tenant.settings.notification_email', 'alerts@stjude.org');
+            ->assertJsonPath('tenant.settings.notification_email', 'alerts@eastbridge.edu');
 
         $this->assertDatabaseHas('tenants', [
             'id'     => $this->tenant->id,
-            'name'   => 'St Jude Hospital Care',
-            'sector' => 'healthcare',
+            'name'   => 'Eastbridge Institute of Tech',
+            'sector' => 'university',
         ]);
     }
 

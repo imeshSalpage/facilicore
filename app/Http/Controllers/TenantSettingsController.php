@@ -65,7 +65,7 @@ class TenantSettingsController extends Controller
     }
 
     /**
-     * Update workspace settings, organization name, and sector strategy.
+     * Update workspace settings and organization name (sector remains immutable).
      */
     public function updateSettings(Request $request): JsonResponse
     {
@@ -73,7 +73,6 @@ class TenantSettingsController extends Controller
 
         $validated = $request->validate([
             'name'                                       => ['required', 'string', 'max:255'],
-            'sector'                                     => ['required', 'string', Rule::in(['university', 'healthcare', 'corporate', 'government'])],
             'settings'                                   => ['nullable', 'array'],
             'settings.auto_approve_standard_bookings'    => ['nullable', 'boolean'],
             'settings.max_advance_booking_days'          => ['nullable', 'integer', 'min:1', 'max:365'],
@@ -89,7 +88,6 @@ class TenantSettingsController extends Controller
 
         $tenant->update([
             'name'     => $validated['name'],
-            'sector'   => $validated['sector'],
             'settings' => $newSettings,
         ]);
 
