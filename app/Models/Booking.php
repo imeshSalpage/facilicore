@@ -35,6 +35,11 @@ class Booking extends Model
         ];
     }
 
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d\TH:i:s');
+    }
+
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
