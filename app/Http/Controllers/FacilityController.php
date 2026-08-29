@@ -23,6 +23,10 @@ class FacilityController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if ($request->user() && $request->user()->role === 'end_user') {
+            abort(403, 'You do not have administrative permission to create facilities.');
+        }
+
         if (!app()->bound(Tenant::class)) {
             abort(403, 'A tenant context is required.');
         }
@@ -53,6 +57,10 @@ class FacilityController extends Controller
      */
     public function update(Request $request, Facility $facility): JsonResponse
     {
+        if ($request->user() && $request->user()->role === 'end_user') {
+            abort(403, 'You do not have administrative permission to modify facilities.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -67,8 +75,12 @@ class FacilityController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Facility $facility): JsonResponse
+    public function destroy(Request $request, Facility $facility): JsonResponse
     {
+        if ($request->user() && $request->user()->role === 'end_user') {
+            abort(403, 'You do not have administrative permission to delete facilities.');
+        }
+
         $facility->delete();
         return response()->json(null, 204);
     }

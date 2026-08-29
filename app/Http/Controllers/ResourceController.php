@@ -23,6 +23,10 @@ class ResourceController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if ($request->user() && $request->user()->role === 'end_user') {
+            abort(403, 'You do not have administrative permission to create resources.');
+        }
+
         if (!app()->bound(Tenant::class)) {
             abort(403, 'A tenant context is required.');
         }
@@ -61,6 +65,10 @@ class ResourceController extends Controller
      */
     public function update(Request $request, Resource $resource): JsonResponse
     {
+        if ($request->user() && $request->user()->role === 'end_user') {
+            abort(403, 'You do not have administrative permission to modify resources.');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -80,8 +88,12 @@ class ResourceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Resource $resource): JsonResponse
+    public function destroy(Request $request, Resource $resource): JsonResponse
     {
+        if ($request->user() && $request->user()->role === 'end_user') {
+            abort(403, 'You do not have administrative permission to delete resources.');
+        }
+
         $resource->delete();
         return response()->json(null, 204);
     }
