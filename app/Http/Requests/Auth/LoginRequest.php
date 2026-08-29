@@ -52,7 +52,7 @@ class LoginRequest extends FormRequest
 
         $user = Auth::user();
 
-        if ($user && $user->approval_status === 'pending') {
+        if ($user && $user->role !== 'admin' && $user->approval_status === 'pending') {
             Auth::logout();
             $this->session()->invalidate();
             $this->session()->regenerateToken();
