@@ -11,7 +11,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'tenant_id', 'role'])]
+#[Fillable([
+    'name',
+    'email',
+    'password',
+    'tenant_id',
+    'role',
+    'registration_number',
+    'department',
+    'phone',
+    'approval_status',
+    'approved_at',
+    'approved_by',
+    'rejection_reason',
+])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -26,6 +39,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function tenant(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function approver(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function isAdmin(): bool
@@ -43,6 +61,21 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role === 'end_user';
     }
 
+    public function isApproved(): bool
+    {
+        return $this->approval_status === 'approved';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->approval_status === 'pending';
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->approval_status === 'rejected';
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -52,7 +85,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'approved_at'       => 'datetime',
+            'password'          => 'hashed',
         ];
     }
 }

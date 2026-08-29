@@ -7,12 +7,14 @@ class UniversityStrategy implements SectorStrategyInterface
     public function getTerminology(): array
     {
         return [
-            'facility'   => 'Campus Building',
-            'facilities' => 'Campus Buildings',
-            'resource'   => 'Asset / Room',
-            'resources'  => 'Assets & Rooms',
-            'supervisor' => 'Professor',
-            'end_user'   => 'Student',
+            'facility'    => 'Campus Building',
+            'facilities'  => 'Campus Buildings',
+            'resource'    => 'Asset / Room',
+            'resources'   => 'Assets & Rooms',
+            'supervisor'  => 'Professor',
+            'end_user'    => 'Student',
+            'reg_number'  => 'Student / Staff ID Number',
+            'department'  => 'Faculty / Academic Department',
         ];
     }
 

@@ -64,4 +64,38 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
         $response->assertNoContent();
     }
+
+    public function test_pending_users_cannot_authenticate(): void
+    {
+        $pendingUser = User::factory()->pending()->create([
+            'tenant_id' => $this->tenant->id,
+            'password'  => bcrypt('password'),
+        ]);
+
+        $response = $this->post('http://university.localhost/api/login', [
+            'email'    => $pendingUser->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
+
+    public function test_rejected_users_cannot_authenticate(): void
+    {
+        $rejectedUser = User::factory()->rejected('Invalid identification')->create([
+            'tenant_id' => $this->tenant->id,
+            'password'  => bcrypt('password'),
+        ]);
+
+        $response = $this->post('http://university.localhost/api/login', [
+            'email'    => $rejectedUser->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertGuest();
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+    }
 }

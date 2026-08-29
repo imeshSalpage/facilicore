@@ -33,17 +33,23 @@ class TenantSettingsController extends Controller
 
         // Calculate workspace stats
         $stats = [
-            'facilities_count'         => Facility::count(),
-            'resources_count'          => Resource::count(),
-            'active_resources_count'   => Resource::where('status', 'active')->count(),
-            'bookings_count'           => Booking::count(),
-            'pending_approvals_count'  => Booking::where('status', 'pending')->count(),
-            'maintenance_orders_count' => MaintenanceOrder::whereIn('status', ['open', 'in_progress'])->count(),
-            'users_total'              => User::count(),
-            'users_by_role'            => [
+            'facilities_count'              => Facility::count(),
+            'resources_count'               => Resource::count(),
+            'active_resources_count'        => Resource::where('status', 'active')->count(),
+            'bookings_count'                => Booking::count(),
+            'pending_approvals_count'       => Booking::where('status', 'pending')->count(),
+            'pending_user_approvals_count'  => User::where('approval_status', 'pending')->count(),
+            'maintenance_orders_count'      => MaintenanceOrder::whereIn('status', ['open', 'in_progress'])->count(),
+            'users_total'                   => User::count(),
+            'users_by_role'                 => [
                 'admin'      => User::where('role', 'admin')->count(),
                 'supervisor' => User::where('role', 'supervisor')->count(),
                 'end_user'   => User::where('role', 'end_user')->count(),
+            ],
+            'users_by_approval_status'      => [
+                'approved' => User::where('approval_status', 'approved')->count(),
+                'pending'  => User::where('approval_status', 'pending')->count(),
+                'rejected' => User::where('approval_status', 'rejected')->count(),
             ],
         ];
 
@@ -104,12 +110,126 @@ class TenantSettingsController extends Controller
     }
 
     /**
-     * List all team members in the tenant.
+     * List all team members and pending applicants in the tenant.
      */
     public function getUsers(): JsonResponse
     {
-        $users = User::orderBy('name')->get(['id', 'name', 'email', 'role', 'email_verified_at', 'created_at']);
+        $users = User::with('approver:id,name,email')
+            ->orderByRaw("CASE WHEN approval_status = 'pending' THEN 0 WHEN approval_status = 'approved' THEN 1 ELSE 2 END")
+            ->orderBy('created_at', 'desc')
+            ->get([
+                'id',
+                'name',
+                'email',
+                'role',
+                'registration_number',
+                'department',
+                'phone',
+                'approval_status',
+                'approved_at',
+                'approved_by',
+                'rejection_reason',
+                'email_verified_at',
+                'created_at',
+            ]);
+
         return response()->json($users);
+    }
+
+    /**
+     * Approve a pending user registration and optionally assign their role.
+     */
+    public function approveUser(Request $request, User $user): JsonResponse
+    {
+        $tenant = app(Tenant::class);
+
+        if ($user->tenant_id !== $tenant->id) {
+            abort(404, 'User not found in this workspace.');
+        }
+
+        $validated = $request->validate([
+            'role' => ['nullable', 'string', Rule::in(['admin', 'supervisor', 'end_user'])],
+        ]);
+
+        $assignedRole = $validated['role'] ?? ($user->role ?? 'end_user');
+
+        $user->update([
+            'approval_status'   => 'approved',
+            'approved_at'       => now(),
+            'approved_by'       => auth()->id(),
+            'role'              => $assignedRole,
+            'rejection_reason'  => null,
+            'email_verified_at' => $user->email_verified_at ?? now(),
+        ]);
+
+        \App\Models\AuditLog::create([
+            'tenant_id'   => $tenant->id,
+            'user_id'     => auth()->id(),
+            'action'      => 'USER_REGISTRATION_APPROVED',
+            'model_type'  => User::class,
+            'model_id'    => $user->id,
+            'payload'     => [
+                'approved_user_id'    => $user->id,
+                'approved_user_name'  => $user->name,
+                'approved_user_email' => $user->email,
+                'assigned_role'       => $assignedRole,
+            ],
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'message' => "User {$user->name} has been approved successfully.",
+            'user'    => $user->fresh()->load('approver:id,name,email'),
+        ]);
+    }
+
+    /**
+     * Reject a user registration request.
+     */
+    public function rejectUser(Request $request, User $user): JsonResponse
+    {
+        $tenant = app(Tenant::class);
+
+        if ($user->tenant_id !== $tenant->id) {
+            abort(404, 'User not found in this workspace.');
+        }
+
+        if ($user->id === auth()->id()) {
+            return response()->json([
+                'message' => 'You cannot reject your own administrator account.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $user->update([
+            'approval_status'  => 'rejected',
+            'rejection_reason' => $validated['reason'] ?? null,
+        ]);
+
+        \App\Models\AuditLog::create([
+            'tenant_id'   => $tenant->id,
+            'user_id'     => auth()->id(),
+            'action'      => 'USER_REGISTRATION_REJECTED',
+            'model_type'  => User::class,
+            'model_id'    => $user->id,
+            'payload'     => [
+                'rejected_user_id'    => $user->id,
+                'rejected_user_name'  => $user->name,
+                'rejected_user_email' => $user->email,
+                'reason'              => $validated['reason'] ?? null,
+            ],
+            'ip_address'  => $request->ip(),
+            'user_agent'  => $request->userAgent(),
+        ]);
+
+        return response()->json([
+            'message' => "User {$user->name} registration has been rejected.",
+            'user'    => $user->fresh(),
+        ]);
     }
 
     /**

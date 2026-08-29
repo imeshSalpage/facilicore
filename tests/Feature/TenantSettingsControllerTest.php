@@ -153,4 +153,78 @@ class TenantSettingsControllerTest extends TestCase
             'role' => 'admin',
         ]);
     }
+
+    public function test_admin_can_approve_pending_user(): void
+    {
+        $pendingUser = User::factory()->pending()->create([
+            'tenant_id'           => $this->tenant->id,
+            'registration_number' => 'STU-9901',
+            'department'          => 'Physics',
+            'phone'               => '555-0182',
+        ]);
+
+        Sanctum::actingAs($this->admin);
+
+        $response = $this->patchJson("/api/tenant/users/{$pendingUser->id}/approve", [
+            'role' => 'end_user',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('user.approval_status', 'approved')
+            ->assertJsonPath('user.role', 'end_user');
+
+        $this->assertDatabaseHas('users', [
+            'id'              => $pendingUser->id,
+            'approval_status' => 'approved',
+            'approved_by'     => $this->admin->id,
+            'role'            => 'end_user',
+        ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'tenant_id' => $this->tenant->id,
+            'user_id'   => $this->admin->id,
+            'action'    => 'USER_REGISTRATION_APPROVED',
+        ]);
+    }
+
+    public function test_admin_can_reject_user_with_reason(): void
+    {
+        $pendingUser = User::factory()->pending()->create([
+            'tenant_id' => $this->tenant->id,
+        ]);
+
+        Sanctum::actingAs($this->admin);
+
+        $response = $this->patchJson("/api/tenant/users/{$pendingUser->id}/reject", [
+            'reason' => 'Invalid institutional identity card.',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('user.approval_status', 'rejected')
+            ->assertJsonPath('user.rejection_reason', 'Invalid institutional identity card.');
+
+        $this->assertDatabaseHas('users', [
+            'id'               => $pendingUser->id,
+            'approval_status'  => 'rejected',
+            'rejection_reason' => 'Invalid institutional identity card.',
+        ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'tenant_id' => $this->tenant->id,
+            'user_id'   => $this->admin->id,
+            'action'    => 'USER_REGISTRATION_REJECTED',
+        ]);
+    }
+
+    public function test_non_admin_cannot_approve_or_reject_users(): void
+    {
+        $pendingUser = User::factory()->pending()->create([
+            'tenant_id' => $this->tenant->id,
+        ]);
+
+        Sanctum::actingAs($this->supervisor);
+
+        $this->patchJson("/api/tenant/users/{$pendingUser->id}/approve")->assertStatus(403);
+        $this->patchJson("/api/tenant/users/{$pendingUser->id}/reject")->assertStatus(403);
+    }
 }

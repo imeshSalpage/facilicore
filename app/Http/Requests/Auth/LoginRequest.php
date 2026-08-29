@@ -50,6 +50,33 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user && $user->approval_status === 'pending') {
+            Auth::logout();
+            $this->session()->invalidate();
+            $this->session()->regenerateToken();
+
+            throw ValidationException::withMessages([
+                'email' => 'Your account registration is currently pending administrator approval. Please wait until a workspace administrator reviews and approves your account.',
+            ]);
+        }
+
+        if ($user && $user->approval_status === 'rejected') {
+            Auth::logout();
+            $this->session()->invalidate();
+            $this->session()->regenerateToken();
+
+            $message = 'Your account registration was declined by the workspace administrator.';
+            if (!empty($user->rejection_reason)) {
+                $message .= ' Reason: ' . $user->rejection_reason;
+            }
+
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

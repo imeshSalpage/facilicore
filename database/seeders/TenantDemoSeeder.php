@@ -632,21 +632,63 @@ class TenantDemoSeeder extends Seeder
     private function seedExtraUsers(Tenant $tenant): void
     {
         $extras = [
-            ['name' => 'Demo Supervisor',   'email' => "supervisor@{$tenant->subdomain}.demo", 'role' => 'supervisor'],
-            ['name' => 'Demo Staff User 1', 'email' => "staff1@{$tenant->subdomain}.demo",     'role' => 'end_user'],
-            ['name' => 'Demo Staff User 2', 'email' => "staff2@{$tenant->subdomain}.demo",     'role' => 'end_user'],
+            [
+                'name'                => 'Demo Supervisor',
+                'email'               => "supervisor@{$tenant->subdomain}.demo",
+                'role'                => 'supervisor',
+                'registration_number' => 'DEMO-SUP-01',
+                'department'          => 'Operations Supervision',
+                'phone'               => '+1 (555) 010-0001',
+                'approval_status'     => 'approved',
+                'approved_at'         => now(),
+            ],
+            [
+                'name'                => 'Demo Staff User 1',
+                'email'               => "staff1@{$tenant->subdomain}.demo",
+                'role'                => 'end_user',
+                'registration_number' => 'DEMO-STF-01',
+                'department'          => 'Primary Operations',
+                'phone'               => '+1 (555) 010-0002',
+                'approval_status'     => 'approved',
+                'approved_at'         => now(),
+            ],
+            [
+                'name'                => 'Demo Staff User 2',
+                'email'               => "staff2@{$tenant->subdomain}.demo",
+                'role'                => 'end_user',
+                'registration_number' => 'DEMO-STF-02',
+                'department'          => 'Logistics & Resources',
+                'phone'               => '+1 (555) 010-0003',
+                'approval_status'     => 'approved',
+                'approved_at'         => now(),
+            ],
+            [
+                'name'                => 'Alex Mercer (Pending Applicant)',
+                'email'               => "applicant@{$tenant->subdomain}.demo",
+                'role'                => 'end_user',
+                'registration_number' => 'DEMO-APP-09',
+                'department'          => 'Research & Analysis',
+                'phone'               => '+1 (555) 010-0009',
+                'approval_status'     => 'pending',
+                'approved_at'         => null,
+            ],
         ];
 
         foreach ($extras as $data) {
             User::withoutGlobalScopes()->firstOrCreate(
                 ['email' => $data['email']],
                 [
-                    'name'              => $data['name'],
-                    'email'             => $data['email'],
-                    'password'          => Hash::make('password'),
-                    'role'              => $data['role'],
-                    'email_verified_at' => now(),
-                    'tenant_id'         => $tenant->id,
+                    'name'                => $data['name'],
+                    'email'               => $data['email'],
+                    'password'            => Hash::make('password'),
+                    'role'                => $data['role'],
+                    'registration_number' => $data['registration_number'],
+                    'department'          => $data['department'],
+                    'phone'               => $data['phone'],
+                    'approval_status'     => $data['approval_status'],
+                    'approved_at'         => $data['approved_at'],
+                    'email_verified_at'   => now(),
+                    'tenant_id'           => $tenant->id,
                 ]
             );
         }

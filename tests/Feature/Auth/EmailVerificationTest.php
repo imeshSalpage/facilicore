@@ -46,4 +46,34 @@ class EmailVerificationTest extends TestCase
 
         $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
+
+    public function test_unverified_admin_is_blocked_by_verified_middleware(): void
+    {
+        $admin = User::factory()->unverified()->create([
+            'role' => 'admin',
+        ]);
+
+        $middleware = new \App\Http\Middleware\EnsureEmailIsVerified();
+        $request = \Illuminate\Http\Request::create('/api/dashboard', 'GET');
+        $request->setUserResolver(fn () => $admin);
+
+        $response = $middleware->handle($request, fn () => response()->json(['status' => 'ok']));
+
+        $this->assertEquals(409, $response->getStatusCode());
+    }
+
+    public function test_unverified_regular_user_passes_verified_middleware_without_conflict(): void
+    {
+        $endUser = User::factory()->unverified()->create([
+            'role' => 'end_user',
+        ]);
+
+        $middleware = new \App\Http\Middleware\EnsureEmailIsVerified();
+        $request = \Illuminate\Http\Request::create('/api/dashboard', 'GET');
+        $request->setUserResolver(fn () => $endUser);
+
+        $response = $middleware->handle($request, fn () => response()->json(['status' => 'ok']));
+
+        $this->assertEquals(200, $response->getStatusCode());
+    }
 }

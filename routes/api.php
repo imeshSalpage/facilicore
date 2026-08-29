@@ -66,6 +66,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('tenant/settings', [TenantSettingsController::class, 'getSettings']);
         Route::put('tenant/settings', [TenantSettingsController::class, 'updateSettings']);
         Route::get('tenant/users', [TenantSettingsController::class, 'getUsers']);
+        Route::patch('tenant/users/{user}/approve', [TenantSettingsController::class, 'approveUser']);
+        Route::patch('tenant/users/{user}/reject', [TenantSettingsController::class, 'rejectUser']);
         Route::patch('tenant/users/{user}/role', [TenantSettingsController::class, 'updateUserRole']);
         Route::post('tenant/sync-templates', [TenantSettingsController::class, 'syncTemplates']);
     });
@@ -126,6 +128,7 @@ Route::get('/tenant-public-info', function () {
         'is_central' => false,
         'name' => $tenant->name,
         'subdomain' => $tenant->subdomain,
+        'sector' => $tenant->sector ?? 'university',
         'facilities' => $facilities,
         'resources' => $resources,
     ]);

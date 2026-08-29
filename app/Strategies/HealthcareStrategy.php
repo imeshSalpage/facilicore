@@ -7,12 +7,14 @@ class HealthcareStrategy implements SectorStrategyInterface
     public function getTerminology(): array
     {
         return [
-            'facility'   => 'Clinic / Ward',
-            'facilities' => 'Clinics & Wards',
-            'resource'   => 'Medical Equipment',
-            'resources'  => 'Medical Equipment / Rooms',
-            'supervisor' => 'Chief Doctor',
-            'end_user'   => 'Nurse / Practitioner',
+            'facility'    => 'Clinic / Ward',
+            'facilities'  => 'Clinics & Wards',
+            'resource'    => 'Medical Equipment',
+            'resources'   => 'Medical Equipment / Rooms',
+            'supervisor'  => 'Chief Doctor',
+            'end_user'    => 'Nurse / Practitioner',
+            'reg_number'  => 'Staff / Medical License ID',
+            'department'  => 'Clinical Department / Ward',
         ];
     }
 

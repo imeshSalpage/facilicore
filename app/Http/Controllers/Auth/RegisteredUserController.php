@@ -26,23 +26,57 @@ class RegisteredUserController extends Controller
             $tenant = app(\App\Models\Tenant::class);
 
             $request->validate([
-                'name'     => ['required', 'string', 'max:255'],
-                'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'name'                => ['required', 'string', 'max:255'],
+                'email'               => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+                'registration_number' => ['required', 'string', 'max:100'],
+                'department'          => ['nullable', 'string', 'max:255'],
+                'phone'               => ['nullable', 'string', 'max:50'],
+                'password'            => ['required', 'confirmed', Rules\Password::defaults()],
             ]);
 
             $user = User::create([
-                'tenant_id' => $tenant->id,
-                'name'      => $request->name,
-                'email'     => $request->email,
-                'password'  => Hash::make($request->string('password')),
+                'tenant_id'           => $tenant->id,
+                'name'                => $request->name,
+                'email'               => $request->email,
+                'registration_number' => $request->registration_number,
+                'department'          => $request->department,
+                'phone'               => $request->phone,
+                'password'            => Hash::make($request->string('password')),
+                'role'                => 'end_user',
+                'approval_status'     => 'pending',
             ]);
 
-            event(new Registered($user));
+            // Log registration request into AuditLog
+            \App\Models\AuditLog::create([
+                'tenant_id'   => $tenant->id,
+                'user_id'     => $user->id,
+                'action'      => 'USER_REGISTERED_PENDING_APPROVAL',
+                'model_type'  => User::class,
+                'model_id'    => $user->id,
+                'payload'     => [
+                    'name'                => $user->name,
+                    'email'               => $user->email,
+                    'registration_number' => $user->registration_number,
+                    'department'          => $user->department,
+                    'phone'               => $user->phone,
+                    'approval_status'     => 'pending',
+                ],
+                'ip_address'  => $request->ip(),
+                'user_agent'  => $request->userAgent(),
+            ]);
 
-            Auth::login($user);
-
-            return response()->noContent();
+            return response()->json([
+                'message' => 'Registration submitted successfully! Your account is currently pending administrator approval.',
+                'status'  => 'pending_approval',
+                'user'    => [
+                    'id'                  => $user->id,
+                    'name'                => $user->name,
+                    'email'               => $user->email,
+                    'registration_number' => $user->registration_number,
+                    'department'          => $user->department,
+                    'approval_status'     => $user->approval_status,
+                ],
+            ], 201);
         } else {
             $request->validate([
                 'company_name' => ['required', 'string', 'max:255'],
@@ -60,11 +94,13 @@ class RegisteredUserController extends Controller
             ]);
 
             $user = User::create([
-                'tenant_id' => $tenant->id,
-                'name'      => $request->name,
-                'email'     => $request->email,
-                'password'  => Hash::make($request->string('password')),
-                'role'      => 'admin', // Tenant founder is always the administrator
+                'tenant_id'       => $tenant->id,
+                'name'            => $request->name,
+                'email'           => $request->email,
+                'password'        => Hash::make($request->string('password')),
+                'role'            => 'admin', // Tenant founder is always the administrator
+                'approval_status' => 'approved',
+                'approved_at'     => now(),
             ]);
 
             event(new Registered($user));

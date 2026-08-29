@@ -25,12 +25,43 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'name'                => fake()->name(),
+            'email'               => fake()->unique()->safeEmail(),
+            'role'                => 'end_user',
+            'registration_number' => 'REG-' . fake()->unique()->numberBetween(10000, 99999),
+            'department'          => 'Main Department',
+            'phone'               => fake()->phoneNumber(),
+            'approval_status'     => 'approved',
+            'approved_at'         => now(),
+            'email_verified_at'   => now(),
+            'password'            => static::$password ??= Hash::make('password'),
+            'remember_token'      => Str::random(10),
         ];
+    }
+
+    /**
+     * Indicate that the user is pending approval.
+     */
+    public function pending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'approval_status' => 'pending',
+            'approved_at'     => null,
+            'approved_by'     => null,
+        ]);
+    }
+
+    /**
+     * Indicate that the user registration was rejected.
+     */
+    public function rejected(string $reason = 'Invalid registration details'): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'approval_status'  => 'rejected',
+            'rejection_reason' => $reason,
+            'approved_at'      => null,
+            'approved_by'      => null,
+        ]);
     }
 
     /**

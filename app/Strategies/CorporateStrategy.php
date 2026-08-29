@@ -7,12 +7,14 @@ class CorporateStrategy implements SectorStrategyInterface
     public function getTerminology(): array
     {
         return [
-            'facility'   => 'Office Branch',
-            'facilities' => 'Office Branches',
-            'resource'   => 'Meeting Room / Desk',
-            'resources'  => 'Rooms & Desks',
-            'supervisor' => 'Team Manager',
-            'end_user'   => 'Employee',
+            'facility'    => 'Office Branch',
+            'facilities'  => 'Office Branches',
+            'resource'    => 'Meeting Room / Desk',
+            'resources'   => 'Rooms & Desks',
+            'supervisor'  => 'Team Manager',
+            'end_user'    => 'Employee',
+            'reg_number'  => 'Employee / Badge ID',
+            'department'  => 'Department / Business Unit',
         ];
     }
 
