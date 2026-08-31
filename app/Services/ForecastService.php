@@ -31,8 +31,12 @@ class ForecastService
         }
 
         // 3. Dynamic Forecasting Model:
+        $driver = DB::connection()->getDriverName();
+        $dowExpr = $driver === 'sqlite' ? "strftime('%w', start_at)" : "DATE_FORMAT(start_at, '%w')";
+        $hourExpr = $driver === 'sqlite' ? "strftime('%H', start_at)" : "DATE_FORMAT(start_at, '%H')";
+
         // Calculate Day-of-Week profile (0 = Sunday, 6 = Saturday)
-        $dayOfWeekStats = Booking::select(DB::raw("strftime('%w', start_at) as day_of_week"), DB::raw("COUNT(*) as count"))
+        $dayOfWeekStats = Booking::select(DB::raw("{$dowExpr} as day_of_week"), DB::raw("COUNT(*) as count"))
             ->where('resource_id', $resource->id)
             ->where('start_at', '>=', $cutoffDate)
             ->where('status', 'confirmed')
@@ -44,7 +48,7 @@ class ForecastService
         $maxDayCount = max(array_values($dayOfWeekStats)) ?: 1;
 
         // Calculate Hourly profiles (08:00 to 18:00)
-        $hourlyStats = Booking::select(DB::raw("strftime('%H', start_at) as hour"), DB::raw("COUNT(*) as count"))
+        $hourlyStats = Booking::select(DB::raw("{$hourExpr} as hour"), DB::raw("COUNT(*) as count"))
             ->where('resource_id', $resource->id)
             ->where('start_at', '>=', $cutoffDate)
             ->where('status', 'confirmed')

@@ -41,7 +41,9 @@ class AnalyticsController extends Controller
             ->get();
 
         // 3. Peak usage hours (07:00 to 21:00)
-        $peakHours = Booking::select(DB::raw("strftime('%H', start_at) as hour"), DB::raw("COUNT(*) as count"))
+        $driver = DB::connection()->getDriverName();
+        $hourExpr = $driver === 'sqlite' ? "strftime('%H', start_at)" : "DATE_FORMAT(start_at, '%H')";
+        $peakHours = Booking::select(DB::raw("{$hourExpr} as hour"), DB::raw("COUNT(*) as count"))
             ->where('start_at', '>=', $startDate)
             ->groupBy('hour')
             ->orderBy('hour')
