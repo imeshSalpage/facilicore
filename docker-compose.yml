@@ -49,13 +49,6 @@ services:
     networks:
       - tenant-network
 
-  proxy-helper:
-    image: alpine
-    container_name: proxy_helper
-    command: /bin/sh -c "exit 0"
-    networks:
-      - tenant-network
-
   proxy:
     image: nginx:alpine
     container_name: nginx_proxy
@@ -71,6 +64,7 @@ services:
 
   mailhog:
     image: mailhog/mailhog:latest
+    platform: linux/amd64
     container_name: mailhog
     ports:
       - "1025:1025"
@@ -79,7 +73,7 @@ services:
       - tenant-network
 
   phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
+    image: phpmyadmin:5.2
     container_name: phpmyadmin
     restart: unless-stopped
     environment:
